@@ -1,0 +1,48 @@
+﻿@model List<RapidBootcamp.WebApplication.Models.Product>
+
+<html>
+<head>
+    <title>List Of Products</title>
+</head>
+<body>
+    <h1>List Of Products</h1>
+    <br />
+    @ViewBag.Message
+    <br />
+
+    <form action="/Products/Index" method="post">
+        <input type="Text" name="productname"/>
+        <input type="submit" value="Search" />
+    </form>
+
+
+    <a href="/Products/Create">Create Product</a>
+    <table border="1">
+        <tr>
+            <th>Product Id</th>
+            <th>Category Name</th>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+        </tr>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.ProductId</td>
+                <td>@product.Category.CategoryName</td>
+                <td>@product.ProductName</td>
+                <td>@decimal.Round(product.Price,2)</td>
+                <td>@product.Stock</td>
+
+                <td><a href="/Products/Details/@product.ProductId">detail</a></td>
+                <td><a href="/Products/Edit/@product.ProductId">edit</a></td>
+                <td><a href="/Products/Delete/@product.ProductId">delete</a></td>
+            </tr>
+        }
+    </table>
+
+</body>
+</html>

@@ -1,5 +1,8 @@
-﻿using RapidBootcamp.WebApplication.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using RapidBootcamp.WebApplication.Models;
 using System.Collections;
+using System.Data.SqlClient;
+using static Dapper.SqlMapper;
 
 namespace RapidBootcamp.WebApplication.DAL
 {
@@ -12,17 +15,44 @@ namespace RapidBootcamp.WebApplication.DAL
         }
         public Category Add(Category entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _dbContext.Add(entity);
+                //_dbContext.Categories.Add(entity);
+                _dbContext.SaveChanges();
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var deleteCategory = GetById(id);
+
+                if (deleteCategory != null)
+                {
+                    _dbContext.Categories.Remove(deleteCategory);
+                    _dbContext.SaveChanges();
+                }
+                else
+                {
+                    throw new ArgumentException("Category not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
 
         public IEnumerable<Category> GetAll()
         {
-            var results  = _dbContext.Categories.ToList();
+            var results = _dbContext.Categories.ToList();
             //var results = from c in _dbContext.Categories
             //              orderby c.CategoryName ascending
             //              select c;
@@ -44,16 +74,38 @@ namespace RapidBootcamp.WebApplication.DAL
             else
             {
                 return results;
-            }   
+            }
         }
         public IEnumerable<Category> GetCategoriesByName(string categoryName)
         {
-            throw new NotImplementedException();
+            //var results = _dbContext.Categories.Where(c => c.CategoryName.Contains(categoryName)).ToList();
+            var results = (from c in _dbContext.Categories
+                          where c.CategoryName == categoryName
+                          select c).ToList();
+            return results;
+
         }
 
         public Category Update(Category entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var updateCategory = GetById(entity.CategoryId);
+                if (updateCategory != null)
+                {
+                    updateCategory.CategoryName = entity.CategoryName;
+                    _dbContext.SaveChanges();
+                }
+                else
+                {
+                    throw new ArgumentException("Category Not Found");
+                }
+                return updateCategory;
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
     }
 }
