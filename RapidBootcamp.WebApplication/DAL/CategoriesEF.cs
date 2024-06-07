@@ -31,6 +31,7 @@ namespace RapidBootcamp.WebApplication.DAL
 
         public Category GetById(int id)
         {
+            // Apa ini
             //var results = _dbContext.Categories.Where(c => c.CategoryId == id).FirstOrDefault();
             var results = (from c in _dbContext.Categories
                            where c.CategoryId == id
