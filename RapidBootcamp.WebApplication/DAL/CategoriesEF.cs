@@ -1,4 +1,5 @@
 ﻿using RapidBootcamp.WebApplication.Models;
+using System.Collections;
 
 namespace RapidBootcamp.WebApplication.DAL
 {
@@ -21,18 +22,29 @@ namespace RapidBootcamp.WebApplication.DAL
 
         public IEnumerable<Category> GetAll()
         {
-            //var results  = _dbContext.Categories.ToList();
-            var results = from c in _dbContext.Categories
-                          orderby c.CategoryName ascending
-                          select c;
+            var results  = _dbContext.Categories.ToList();
+            //var results = from c in _dbContext.Categories
+            //              orderby c.CategoryName ascending
+            //              select c;
             return results.ToList();
         }
 
         public Category GetById(int id)
         {
-            throw new NotImplementedException();
-        }
+            //var results = _dbContext.Categories.Where(c => c.CategoryId == id).FirstOrDefault();
+            var results = (from c in _dbContext.Categories
+                           where c.CategoryId == id
+                           select c).FirstOrDefault();
 
+            if (results == null)
+            {
+                throw new ArgumentException("Category not found");
+            }
+            else
+            {
+                return results;
+            }   
+        }
         public IEnumerable<Category> GetCategoriesByName(string categoryName)
         {
             throw new NotImplementedException();
