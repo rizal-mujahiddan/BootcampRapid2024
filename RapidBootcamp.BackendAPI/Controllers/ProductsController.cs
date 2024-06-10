@@ -35,8 +35,6 @@ namespace RapidBootcamp.BackendAPI.Controllers
             return Ok(results);
         }
 
-        [HttpGet("By")]
-
 
         // POST api/<ProductsController>
         [HttpPost]
