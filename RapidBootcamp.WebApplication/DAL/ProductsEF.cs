@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RapidBootcamp.WebApplication.Models;
+using RapidBootcamp.BackendAPI.Models;
 
-namespace RapidBootcamp.WebApplication.DAL
+namespace RapidBootcamp.BackendAPI.DAL
 {
     public class ProductsEF : IProduct
     {

@@ -11,6 +11,6 @@ namespace RapidBootcamp.ConsoleApp.DAL
     {
         IEnumerable<Product> GetByCategory(int categoryId);
         IEnumerable<Product> GetByProductName(string productName);
-        IEnumerable<Product> GetProducsWithCategory();
+        //IEnumerable<Product> GetProducsWithCategory();
     }
 }

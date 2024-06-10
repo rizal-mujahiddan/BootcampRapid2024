@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RapidBootcamp.WebApplication.Models;
+using RapidBootcamp.BackendAPI.Models;
 
 namespace RapidBootcamp.WebApplication.DAL
 {

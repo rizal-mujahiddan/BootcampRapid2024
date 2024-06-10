@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RapidBootcamp.WebApplication.Models;
+using RapidBootcamp.BackendAPI.Models;
 using System.Collections;
 using System.Data.SqlClient;
-using static Dapper.SqlMapper;
-
 namespace RapidBootcamp.WebApplication.DAL
 {
     public class CategoriesEF : ICategory

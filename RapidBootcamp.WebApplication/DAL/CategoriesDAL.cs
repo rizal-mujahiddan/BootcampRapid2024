@@ -1,5 +1,4 @@
-﻿using Dapper;
-using RapidBootcamp.WebApplication.Models;
+﻿using RapidBootcamp.BackendAPI.Models;
 using System.Data.SqlClient;
 
 namespace RapidBootcamp.WebApplication.DAL
