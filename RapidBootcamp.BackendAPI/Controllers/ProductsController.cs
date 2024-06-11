@@ -17,43 +17,93 @@ namespace RapidBootcamp.BackendAPI.Controllers
         }
 
         // GET: api/<ProductsController>
-
-
-
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public IEnumerable<Product> Get()
         {
-            var results = _product.GetProducsWithCategory();
-            return Ok(results);
+            var products = _product.GetProducsWithCategory();
+            return products;
         }
 
         // GET api/<ProductsController>/5
         [HttpGet("{id}")]
-        public ActionResult<Product> Get(int id)
+        public Product Get(int id)
         {
-            var results = _product.GetById(id);
-            return Ok(results);
+            var product = _product.GetById(id);
+
+            return product;
         }
 
+        [HttpGet("ByCategory/{CategoryId}")]
+        public IEnumerable<Product> GetByCategory(int CategoryId)
+        {
+            var products = _product.GetByCategory(CategoryId);
+            return products;
+        }
+
+        [HttpGet("ByProductName")]
+        public ActionResult<IEnumerable<Product>> GetByCategory(string name)
+        {
+            var products = _product.GetByProductName(name);
+            return Ok(products);
+        }
 
         // POST api/<ProductsController>
         [HttpPost]
         public ActionResult Post(Product product)
         {
-            var results = _product.Add(product);
-            return CreatedAtAction(nameof(Get),new {ProductId = product.ProductId, product.ProductName,product.Price});
+            try
+            {
+                var results = _product.Add(product);
+                return CreatedAtAction(nameof(Get), new { id = results.ProductId }, results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT api/<ProductsController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public ActionResult Put(int id, [FromBody] Product product
+            )
         {
+            var updateProduct = _product.GetById(id);
+            if(updateProduct == null)
+            {
+                return NotFound(); 
+            }
+            try
+            {
+                updateProduct.ProductName = product.ProductName;
+                updateProduct.ProductId = product.CategoryId;
+                updateProduct.Stock = product.Stock;
+                updateProduct.Price = product.Price;
+                var result = _product.Update(updateProduct);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE api/<ProductsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public ActionResult Delete(int id)
         {
+            var deleteProduct = _product.GetById(id);
+            if (deleteProduct == null) { 
+                return NotFound();
+            }
+            try
+            {
+                _product.Delete(id);
+                return Ok($"Product {id} berasil didelete...");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using RapidBootcamp.BackendAPI.DAL;
-using RapidBootcamp.BackendAPI.Models;
+﻿using RapidBootcamp.BackendAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -12,13 +11,15 @@ namespace RapidBootcamp.BackendAPI.DAL
     public class ProductsDAL : IProduct
     {
         private string? _connectionString;
+        private readonly IConfiguration _config;
         private SqlConnection _connection;
         private SqlCommand _command;
         private SqlDataReader _reader;
 
-        public ProductsDAL()
+        public ProductsDAL(IConfiguration config)
         {
-            _connectionString = @"Server=.\;Database=RapidDb;Trusted_Connection=True;";
+            _config = config;
+            _connectionString = _config.GetConnectionString("DefaultConnection");
             _connection = new SqlConnection(_connectionString);
         }
 
@@ -157,7 +158,8 @@ namespace RapidBootcamp.BackendAPI.DAL
             try
             {
                 Product product = new Product();
-                string query = @"SELECT * FROM ViewProductswithCategories where ProductId=@ProductId";
+                string query = @"select * from ViewProductsWithCategory 
+                                 where ProductId=@ProductId";
                 _command = new SqlCommand(query, _connection);
                 _command.Parameters.AddWithValue("@ProductId", id);
                 _connection.Open();
@@ -170,6 +172,11 @@ namespace RapidBootcamp.BackendAPI.DAL
                     product.CategoryId = Convert.ToInt32(_reader["CategoryId"]);
                     product.Price = Convert.ToDecimal(_reader["Price"]);
                     product.Stock = Convert.ToInt32(_reader["Stock"]);
+                    product.Category = new Category
+                    {
+                        CategoryId = Convert.ToInt32(_reader["CategoryId"]),
+                        CategoryName = _reader["CategoryName"].ToString()
+                    };
                 }
                 else
                 {
@@ -194,9 +201,9 @@ namespace RapidBootcamp.BackendAPI.DAL
             try
             {
                 List<Product> products = new List<Product>();
-                string query = @"SELECT * FROM Products
-                                 WHERE ProductName like @ProductName
-                                 ORDER BY ProductName ASC";
+                string query = @"select * from ViewProductsWithCategory 
+                                 where ProductName like @ProductName
+                                 order by ProductName asc";
                 _command = new SqlCommand(query, _connection);
                 _command.Parameters.AddWithValue("@ProductName", "%" + productName + "%");
                 _connection.Open();
@@ -209,23 +216,23 @@ namespace RapidBootcamp.BackendAPI.DAL
                         {
                             ProductId = Convert.ToInt32(_reader["ProductId"]),
                             ProductName = _reader["ProductName"].ToString(),
-                            CategoryId = Convert.ToInt32(_reader["CategoryId "]),
+                            CategoryId = Convert.ToInt32(_reader["CategoryId"]),
                             Price = Convert.ToDecimal(_reader["Price"]),
                             Stock = Convert.ToInt32(_reader["Stock"]),
-                            Category = new Category {
+                            Category = new Category
+                            {
                                 CategoryId = Convert.ToInt32(_reader["CategoryId"]),
                                 CategoryName = _reader["CategoryName"].ToString()
                             }
                         });
                     }
                 }
+                _reader.Close();
                 return products;
-
             }
-            catch (Exception ex)
+            catch (SqlException sqlEx)
             {
-
-                throw new ArgumentException($"{ex.Message}");
+                throw new ArgumentException(sqlEx.Message);
             }
             finally
             {
@@ -238,7 +245,9 @@ namespace RapidBootcamp.BackendAPI.DAL
         {
             try
             {
-                string query = @"SELECT * FROM ViewProductswithCategories";
+                string query = @"select p.ProductId,p.CategoryId,p.ProductName,p.Stock,p.Price,c.CategoryName
+                                 from Products p inner join Categories c on p.CategoryId=c.CategoryId
+                                 order by p.ProductName";
                 _command = new SqlCommand(query, _connection);
                 _connection.Open();
                 _reader = _command.ExecuteReader();
@@ -276,16 +285,6 @@ namespace RapidBootcamp.BackendAPI.DAL
             }
         }
 
-        public IEnumerable<Product> GetProductsByCategory(int categoryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Product> GetProductsByName(string productName)
-        {
-            throw new NotImplementedException();
-        }
-
         public Product Update(Product entity)
         {
             try
@@ -317,17 +316,6 @@ namespace RapidBootcamp.BackendAPI.DAL
                 _command.Dispose();
                 _connection.Close();
             }
-        }
-
-
-        IEnumerable<Product> ICrud<Product>.GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        Product ICrud<Product>.GetById(int id)
-        {
-            throw new NotImplementedException();
         }
     }
 }
