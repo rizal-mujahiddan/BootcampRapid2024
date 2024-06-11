@@ -7,6 +7,8 @@ using RapidBootcamp.BackendAPI.ViewModels;
 
 namespace RapidBootcamp.BackendAPI.Controllers
 {
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class OrderHeadersController : ControllerBase
@@ -16,6 +18,7 @@ namespace RapidBootcamp.BackendAPI.Controllers
         {
             _orderHeaders = orderHeaders;
         }
+
         // GET: api/<OrderHeadersController>
         [HttpGet]
         public IEnumerable<OrderHeader> Get()
@@ -25,7 +28,7 @@ namespace RapidBootcamp.BackendAPI.Controllers
         }
 
         [HttpGet("View")]
-        public IEnumerable<ViewOrderHeaderInfo> GetAllWithView()
+        public IEnumerable<ViewOrderHeaderInfo> GetWithView()
         {
             var results = _orderHeaders.GetAllWithView();
             return results;
@@ -44,22 +47,22 @@ namespace RapidBootcamp.BackendAPI.Controllers
         {
             try
             {
+                //ambil last orderheaderid
                 string lastOrderHeaderId = _orderHeaders.GetOrderLastHeaderId();
+
                 lastOrderHeaderId = lastOrderHeaderId.Substring(4, 4);
                 int newOrderHeaderId = Convert.ToInt32(lastOrderHeaderId) + 1;
                 string newOrderHeaderIdString = "INV-" + newOrderHeaderId.ToString("D4");
 
                 orderHeader.OrderHeaderId = newOrderHeaderIdString;
-                var result = _orderHeaders.Add(orderHeader);
 
+                var result = _orderHeaders.Add(orderHeader);
                 return Ok(result);
             }
-            catch (Exception)
+            catch (System.Exception ex)
             {
-
-                throw;
+                return BadRequest(ex.Message);
             }
-
         }
 
         // PUT api/<OrderHeadersController>/5

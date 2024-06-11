@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace RapidBootcamp.BackendAPI.DAL
 {
-    public class OrderHeadersDAL : IOrderHeaders
+    public class OrderHeaderDAL : IOrderHeaders
     {
         private string? _connectionString;
         private readonly IConfiguration _config;
@@ -12,7 +12,9 @@ namespace RapidBootcamp.BackendAPI.DAL
         private SqlCommand _command;
         private SqlDataReader _reader;
 
-        public OrderHeadersDAL(IConfiguration config)
+
+
+        public OrderHeaderDAL(IConfiguration config)
         {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection");
@@ -23,31 +25,19 @@ namespace RapidBootcamp.BackendAPI.DAL
         {
             try
             {
-                string query = @"INSERT INTO OrderHeaders (OrderHeaderId, WalletId)
-                                VALUES (@OrderHeaderId,@WalletId)";
-                
-                
-                _command = new SqlCommand(query,_connection);
+                string query = @"insert into OrderHeaders (OrderHeaderId, WalletId) 
+                                 values (@OrderHeaderId, @WalletId)";
+                _command = new SqlCommand(query, _connection);
                 _command.Parameters.AddWithValue("@OrderHeaderId", entity.OrderHeaderId);
                 _command.Parameters.AddWithValue("@WalletId", entity.WalletId);
-
                 _connection.Open();
-                _reader = _command.ExecuteReader();
+                _command.ExecuteNonQuery();
 
-                if (_reader == null) {
-                    throw new ArgumentException("Data Cant be Insert");
-                }
                 return entity;
-
             }
-            catch (Exception ex)
+            catch (SqlException sqlEx)
             {
-                throw new ArgumentException(ex.Message);
-            }
-            finally
-            {
-                _command.Dispose();
-                _connection.Close();
+                throw new ArgumentException(sqlEx.Message);
             }
         }
 
@@ -60,9 +50,10 @@ namespace RapidBootcamp.BackendAPI.DAL
         {
             try
             {
-                List<OrderHeader> orderheaders = new List<OrderHeader>();
-                string query = @"SELECT * FROM ViewOrderHeaderInfo
-                                 ORDER BY OrderHeaderId DESC";
+                List<OrderHeader> orderHeaders = new List<OrderHeader>();
+                string query = @"select * from ViewOrderHeaderInfo 
+                                 order by OrderHeaderId desc";
+
                 _command = new SqlCommand(query, _connection);
                 _connection.Open();
                 _reader = _command.ExecuteReader();
@@ -70,17 +61,19 @@ namespace RapidBootcamp.BackendAPI.DAL
                 {
                     while (_reader.Read())
                     {
-                        orderheaders.Add(new OrderHeader
+                        orderHeaders.Add(new OrderHeader
                         {
                             OrderHeaderId = _reader["OrderHeaderId"].ToString(),
                             TransactionDate = Convert.ToDateTime(_reader["TransactionDate"]),
-                            //WalletId = Convert.ToInt32(_reader["WalletId"]),
-                            Wallet = new Wallet() { 
+                            Wallet = new Wallet
+                            {
                                 CustomerId = Convert.ToInt32(_reader["CustomerId"]),
-                                Customer = new Customer { 
+                                Customer = new Customer
+                                {
                                     CustomerName = _reader["CustomerName"].ToString()
                                 },
-                                WalletType = new WalletType { 
+                                WalletType = new WalletType
+                                {
                                     WalletName = _reader["WalletName"].ToString()
                                 }
                             }
@@ -88,7 +81,7 @@ namespace RapidBootcamp.BackendAPI.DAL
                     }
                 }
                 _reader.Close();
-                return orderheaders;
+                return orderHeaders;
             }
             catch (SqlException sqlEx)
             {
@@ -97,7 +90,7 @@ namespace RapidBootcamp.BackendAPI.DAL
             finally
             {
                 _command.Dispose();
-                _connection.Dispose();
+                _connection.Close();
             }
         }
 
@@ -116,12 +109,12 @@ namespace RapidBootcamp.BackendAPI.DAL
             try
             {
                 List<ViewOrderHeaderInfo> viewOrderHeaderInfos = new List<ViewOrderHeaderInfo>();
-                string query = @"Select * from ViewOrderHeaderInfo
-                             ORDER BY CustomerId";
+                string query = @"select * from ViewOrderHeaderInfo 
+                                 order by OrderHeaderId desc";
+
                 _command = new SqlCommand(query, _connection);
                 _connection.Open();
                 _reader = _command.ExecuteReader();
-
                 if (_reader.HasRows)
                 {
                     while (_reader.Read())
@@ -138,7 +131,6 @@ namespace RapidBootcamp.BackendAPI.DAL
                 }
                 _reader.Close();
                 return viewOrderHeaderInfos;
-
             }
             catch (SqlException sqlEx)
             {
@@ -153,24 +145,25 @@ namespace RapidBootcamp.BackendAPI.DAL
 
         public string GetOrderLastHeaderId()
         {
+            string query = @"select top 1 OrderHeaderId from OrderHeaders 
+                             order by OrderHeaderId desc";
             try
             {
-                string query = @"SELECT TOP 1 OrderHeaderId from OrderHeaders 
-                                 ORDER BY OrderHeaderId desc";
-                _command = new SqlCommand(query,_connection);
+                _command = new SqlCommand(query, _connection);
                 _connection.Open();
                 var lastOrderHeaderId = _command.ExecuteScalar().ToString();
                 if (lastOrderHeaderId == null)
                 {
-                    throw new ArgumentException("OrderHeader not Found");
+                    throw new ArgumentException("OrderHeaderId not found");
                 }
                 return lastOrderHeaderId;
             }
-            catch (SqlException SqlEx)
+            catch (SqlException sqlEx)
             {
-                throw new ArgumentException(SqlEx.Message);
+                throw new ArgumentException(sqlEx.Message);
             }
-            finally { 
+            finally
+            {
                 _command.Dispose();
                 _connection.Close();
             }
