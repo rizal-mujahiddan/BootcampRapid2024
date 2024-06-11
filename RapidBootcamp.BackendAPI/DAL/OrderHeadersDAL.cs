@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace RapidBootcamp.BackendAPI.DAL
 {
-    public class OrderHeaderDAL : IOrderHeaders
+    public class OrderHeadersDAL : IOrderHeaders
     {
         private string? _connectionString;
         private readonly IConfiguration _config;
@@ -14,7 +14,7 @@ namespace RapidBootcamp.BackendAPI.DAL
 
 
 
-        public OrderHeaderDAL(IConfiguration config)
+        public OrderHeadersDAL(IConfiguration config)
         {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection");

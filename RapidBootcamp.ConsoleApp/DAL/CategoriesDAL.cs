@@ -12,8 +12,9 @@ namespace RapidBootcamp.ConsoleApp.DAL
     {
         private string? _connectionString;
         private SqlConnection _connection;
-        private SqlCommand _command = null!;
-        private SqlDataReader _reader = null!;
+        private SqlCommand _command;
+        private SqlDataReader _reader;
+
         public CategoriesDAL()
         {
             //Server=localhost,1433;Database=ProductDb;User=sa;Password=Indonesia@2023;TrustServerCertificate=True;MultipleActiveResultSets=true;
