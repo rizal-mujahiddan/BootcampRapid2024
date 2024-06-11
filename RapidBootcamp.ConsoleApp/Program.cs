@@ -497,7 +497,7 @@ using RapidBootcamp.ConsoleApp.Domain;
 //}
 
 
-//update Products
+////update Products
 //Console.Write("Masukan ProductId yang akan diupdate : ");
 //int productId = Convert.ToInt32(Console.ReadLine());
 //Product productToUpdate = productsDAL.GetById(productId);
@@ -525,19 +525,37 @@ using RapidBootcamp.ConsoleApp.Domain;
 //}
 //Console.WriteLine("-----------------------------------------------------------");
 
+
+
+/*foreach (Category category in categories)
+{
+    if (category.CategoryName.ToLower().Contains("laptop"))
+    {
+        Console.WriteLine($"{category.CategoryId} - {category.CategoryName}");
+    }
+}*/
+
+//var searchResult = categories.Where(c => c.CategoryName.ToLower().Contains("laptop")).ToList();
+//var searchResult = from c in categories
+//                   where c.CategoryName.ToLower().Contains("laptop")
+//                   select c;
+
+//foreach (Category category in searchResult)
+//{
+//    Console.WriteLine($"{category.CategoryId} - {category.CategoryName}");
+//}
+
 CategoriesDAL categoriesDAL = new CategoriesDAL();
 ProductsDAL productsDAL = new ProductsDAL();
-
 
 List<Category> categories = categoriesDAL.GetAll().ToList();
 List<Product> products = productsDAL.GetAll().ToList();
 
-
 //List<Category> categories2 = new List<Category>();
-//categories2.Add(new Category { CategoryId = 1,CategoryName="Laptop Gaming"});
+//categories2.Add(new Category { CategoryId = 1, CategoryName = "Laptop Gaming" });
 //categories2.Add(new Category { CategoryId = 2, CategoryName = "Laptop Office" });
 //categories2.Add(new Category { CategoryId = 3, CategoryName = "SSD" });
-//categories2.Add(new Category { CategoryId = 4, CategoryName = "Keyboard" });
+//categories2.Add(new Category { CategoryId = 99, CategoryName = "Keyboard" });
 
 //var listId1 = categories.Select(c => c.CategoryId).ToList();
 //var listId2 = categories2.Select(c => c.CategoryId).ToList();
@@ -552,11 +570,11 @@ List<Product> products = productsDAL.GetAll().ToList();
 
 //foreach (int result in exceptResult)
 //{
-//    var category = categories.Where(c=>c.CategoryId == result).FirstOrDefault();
+//    var category = categories.Where(c => c.CategoryId == result).FirstOrDefault();
 //    categories2.Add(category);
 //}
 
-//Console.WriteLine("------------------------------------------------------------------------------------------");
+//Console.WriteLine("-----------------------------------------------------------");
 
 //Console.WriteLine("Category 2");
 //foreach (Category category in categories2)
@@ -564,21 +582,31 @@ List<Product> products = productsDAL.GetAll().ToList();
 //    Console.WriteLine($"{category.CategoryId} - {category.CategoryName}");
 //}
 
+//var joinResult = from p in products
+//                 join c in categories
+//                 on p.CategoryId equals c.CategoryId
+//                 select new
+//                 {
+//                     ProductId = p.ProductId,
+//                     ProductName = p.ProductName,
+//                     CategoryName = c.CategoryName,
+//                     Price = p.Price,
+//                     Stock = p.Stock
+//                 };
 
 var joinResult = from p in products
                  join c in categories
                  on p.CategoryId equals c.CategoryId
-                 select new
+                 select new Product
                  {
                      ProductId = p.ProductId,
                      ProductName = p.ProductName,
-                     CategoryName = c.CategoryName,
                      Price = p.Price,
                      Stock = p.Stock,
+                     Category = c
                  };
 
-foreach (var product in joinResult) { 
-    Console.WriteLine($"{product.ProductId} - {product.ProductName} - {product.CategoryName} - {product.Price} - {product.Stock}");
+foreach (var product in joinResult)
+{
+    Console.WriteLine($"{product.ProductId} - {product.ProductName} - {product.Category.CategoryName} - {product.Price} - {product.Stock}");
 }
-
-
