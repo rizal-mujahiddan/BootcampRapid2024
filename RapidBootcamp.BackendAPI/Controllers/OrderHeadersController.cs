@@ -53,21 +53,7 @@ namespace RapidBootcamp.BackendAPI.Controllers
             try
             {
                 //ambil last orderheaderid
-                string lastOrderHeaderId = _orderHeaders.GetOrderLastHeaderId();
-
-                lastOrderHeaderId = lastOrderHeaderId.Substring(4, 4);
-                int newOrderHeaderId = Convert.ToInt32(lastOrderHeaderId) + 1;
-                string newOrderHeaderIdString = "INV-" + newOrderHeaderId.ToString("D4");
-
-                orderHeader.OrderHeaderId = newOrderHeaderIdString;
-
                 var result = _orderHeaders.Add(orderHeader);
-                foreach (var item in orderHeader.OrderDetails)
-                {
-                    item.OrderHeaderId = newOrderHeaderIdString;
-                    _orderDetail.Add(item);
-                }
-
                 return Ok(result);
             }
             catch (System.Exception ex)

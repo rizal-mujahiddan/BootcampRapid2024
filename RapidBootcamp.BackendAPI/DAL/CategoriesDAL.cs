@@ -1,6 +1,7 @@
 ﻿using RapidBootcamp.BackendAPI.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -54,8 +55,9 @@ namespace RapidBootcamp.BackendAPI.DAL
         {
             try
             {
-                string query = @"delete from Categories where CategoryId=@CategoryId";
+                string query = @"sp_deleteCategory";
                 _command = new SqlCommand(query, _connection);
+                _command.CommandType = CommandType.StoredProcedure;
                 _command.Parameters.AddWithValue("@CategoryId", id);
                 _connection.Open();
                 int result = _command.ExecuteNonQuery();
@@ -82,10 +84,9 @@ namespace RapidBootcamp.BackendAPI.DAL
                 //poco object untuk menampung data dari database
                 List<Category> categories = new List<Category>();
 
-                string query = @"SELECT * FROM Categories 
-                                 order by CategoryName asc";
+                string query = @"sp_GetAllCategories";
                 _command = new SqlCommand(query, _connection);
-
+                _command.CommandType = CommandType.StoredProcedure;
                 //buka koneksi
                 _connection.Open();
 

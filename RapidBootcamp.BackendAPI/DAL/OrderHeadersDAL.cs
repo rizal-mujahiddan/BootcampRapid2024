@@ -1,6 +1,7 @@
 ﻿using RapidBootcamp.BackendAPI.Models;
 using RapidBootcamp.BackendAPI.ViewModels;
 using System.Data.SqlClient;
+using System.Transactions;
 
 namespace RapidBootcamp.BackendAPI.DAL
 {
@@ -8,34 +9,61 @@ namespace RapidBootcamp.BackendAPI.DAL
     {
         private string? _connectionString;
         private readonly IConfiguration _config;
+        private readonly IOrderDetail _orderDetail;
         private SqlConnection _connection;
         private SqlCommand _command;
         private SqlDataReader _reader;
 
-        public OrderHeaderDAL(IConfiguration config)
+        public OrderHeaderDAL(IConfiguration config, IOrderDetail orderDetail)
         {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection");
             _connection = new SqlConnection(_connectionString);
+            _orderDetail = orderDetail;
         }
 
         public OrderHeader Add(OrderHeader entity)
         {
-            try
-            {
-                string query = @"insert into OrderHeaders (OrderHeaderId, WalletId) 
-                                 values (@OrderHeaderId, @WalletId)";
-                _command = new SqlCommand(query, _connection);
-                _command.Parameters.AddWithValue("@OrderHeaderId", entity.OrderHeaderId);
-                _command.Parameters.AddWithValue("@WalletId", entity.WalletId);
-                _connection.Open();
-                _command.ExecuteNonQuery();
+            TransactionManager.ImplicitDistributedTransactions = true;
+            using (TransactionScope scope = new TransactionScope()) { 
+                try
+                {
+                    string lastOrderHeaderId = GetOrderLastHeaderId();
 
-                return entity;
-            }
-            catch (SqlException sqlEx)
-            {
-                throw new ArgumentException(sqlEx.Message);
+                    lastOrderHeaderId = lastOrderHeaderId.Substring(4, 4);
+                    int newOrderHeaderId = Convert.ToInt32(lastOrderHeaderId) + 1;
+                    string newOrderHeaderIdString = "INV-" + newOrderHeaderId.ToString("D4");
+
+                    string query = @"insert into OrderHeaders (OrderHeaderId, WalletId) 
+                                     values (@OrderHeaderId, @WalletId)";
+                    _command = new SqlCommand(query, _connection);
+                    _command.Parameters.AddWithValue("@OrderHeaderId", entity.OrderHeaderId);
+                    _command.Parameters.AddWithValue("@WalletId", entity.WalletId);
+                    _connection.Open();
+                    _command.ExecuteNonQuery();
+
+
+                    if (entity.OrderDetails != null) {
+                        foreach (var item in entity.OrderDetails)
+                        {
+                            item.OrderHeaderId = newOrderHeaderIdString;
+                            _orderDetail.Add(item);
+                        }
+                    }
+
+
+                    scope.Complete();
+                    return entity;
+                }
+                catch (SqlException sqlEx)
+                {
+                    throw new ArgumentException(sqlEx.Message);
+                }
+                finally {
+                    scope.Dispose();
+                    _command.Dispose();
+                    _connection.Close();
+                }
             }
         }
 
@@ -136,6 +164,7 @@ namespace RapidBootcamp.BackendAPI.DAL
             }
             finally
             {
+
                 _command.Dispose();
                 _connection.Close();
             }
@@ -143,10 +172,13 @@ namespace RapidBootcamp.BackendAPI.DAL
 
         public string GetOrderLastHeaderId()
         {
-            string query = @"select top 1 OrderHeaderId from OrderHeaders 
-                             order by OrderHeaderId desc";
+
+
+
             try
             {
+                string query = @"select top 1 OrderHeaderId from OrderHeaders 
+                             order by OrderHeaderId desc";
                 _command = new SqlCommand(query, _connection);
                 _connection.Open();
                 var lastOrderHeaderId = _command.ExecuteScalar().ToString();

@@ -12,12 +12,13 @@ namespace RapidBootcamp.BackendAPI.DAL
         private SqlConnection _connection;
         private SqlCommand _command;
         private SqlDataReader _reader;
-
-        public OrderDetailsDAL(IConfiguration config)
+        private readonly IProduct _product;
+        public OrderDetailsDAL(IConfiguration config, IProduct product)
         {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection");
             _connection = new SqlConnection(_connectionString);
+            _product = product;
         }
 
         public IEnumerable<OrderDetail> GetDetailsByHeaderId(string orderHeaderId)
@@ -80,6 +81,11 @@ namespace RapidBootcamp.BackendAPI.DAL
             {
                 try
                 {
+                    int stock = _product.GetProductStock(entity.ProductId);
+                    if ( stock < entity.Qty)
+                    {
+                        throw new ArgumentException("Stock is not enough");   
+                    }
 
                     string query = @"insert into OrderDetails(OrderHeaderId,ProductId,Qty,Price) 
                                  values(@OrderHeaderId,@ProductId,@Qty,@Price);
@@ -114,6 +120,9 @@ namespace RapidBootcamp.BackendAPI.DAL
                 catch (TransactionException tranEx)
                 {
                     throw new ArgumentException(tranEx.Message);
+                }
+                catch(Exception ex){
+                    throw new ArgumentException(ex.Message);
                 }
                 finally
                 {
