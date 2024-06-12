@@ -23,7 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //DI
 builder.Services.AddScoped<ICategory, CategoryEF>();
 builder.Services.AddScoped<IProduct, ProductEF>();
-builder.Services.AddScoped<IOrderHeaders, OrderHeadersDAL>();
+builder.Services.AddScoped<IOrderHeaders, OrderHeaderEF>();
 builder.Services.AddScoped<IOrderDetail, OrderDetailsDAL>();
 builder.Services.AddScoped<IWallet, WalletsDAL>();
 

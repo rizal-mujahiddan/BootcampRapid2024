@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RapidBootcamp.BackendAPI.DAL;
+using RapidBootcamp.BackendAPI.DTO;
 using RapidBootcamp.BackendAPI.Models;
 using RapidBootcamp.BackendAPI.ViewModels;
 
@@ -24,15 +25,44 @@ namespace RapidBootcamp.BackendAPI.Controllers
 
         // GET: api/<OrderHeadersController>
         [HttpGet]
-        public IEnumerable<OrderHeader> Get()
+        public IEnumerable<OrderHeaderDTO> Get()
         {
+            List<OrderHeaderDTO> orderHeaderDTOs = new List<OrderHeaderDTO>();
             var results = _orderHeaders.GetAll();
-            foreach (var item in results)
-            {
-                item.OrderDetails = _orderDetail.GetDetailsByHeaderId(item.OrderHeaderId);
-            }
 
-            return results;
+            foreach (var result in results) { 
+                List<OrderDetailDTO> detailDTOs = new List<OrderDetailDTO>();
+                foreach (var detail in result.OrderDetails)
+                {
+                    OrderDetailDTO orderDetailDTO = new OrderDetailDTO
+                    {
+                        OrderDetailId = detail.OrderDetailId,
+                        OrderHeaderId = detail.OrderHeaderId,
+                        ProductId = detail.ProductId,
+                        Qty = detail.Qty,
+                        Price = detail.Price,
+                    };
+                    detailDTOs.Add(orderDetailDTO);
+                }
+                OrderHeaderDTO orderHeaderDTO = new OrderHeaderDTO
+                {
+                    WalletId = result.WalletId,
+                    TransactionDate = result.TransactionDate,
+                    OrderHeaderId = result.OrderHeaderId,
+                    CustomerName = result.Wallet.Customer.CustomerName,
+                    WalletName = result.Wallet.WalletType.WalletName,
+                    Saldo = result.Wallet.Saldo,
+                };
+
+                orderHeaderDTO.orderDetails = detailDTOs;
+                orderHeaderDTOs.Add(orderHeaderDTO);
+            }
+            return orderHeaderDTOs;
+            //foreach (var item in results)
+            //{
+            //    item.OrderDetails = _orderDetail.GetDetailsByHeaderId(item.OrderHeaderId);
+            //}
+
         }
 
         [HttpGet("View")]
