@@ -15,6 +15,7 @@ namespace RapidBootcamp.BackendAPI.Controllers
     {
         private readonly IOrderHeaders _orderHeaders;
         private readonly IOrderDetail _orderDetail;
+
         public OrderHeadersController(IOrderHeaders orderHeaders, IOrderDetail orderDetail)
         {
             _orderHeaders = orderHeaders;
@@ -26,9 +27,11 @@ namespace RapidBootcamp.BackendAPI.Controllers
         public IEnumerable<OrderHeader> Get()
         {
             var results = _orderHeaders.GetAll();
-            foreach (var item in results) {
+            foreach (var item in results)
+            {
                 item.OrderDetails = _orderDetail.GetDetailsByHeaderId(item.OrderHeaderId);
             }
+
             return results;
         }
 
@@ -52,7 +55,6 @@ namespace RapidBootcamp.BackendAPI.Controllers
         {
             try
             {
-                //ambil last orderheaderid
                 var result = _orderHeaders.Add(orderHeader);
                 return Ok(result);
             }

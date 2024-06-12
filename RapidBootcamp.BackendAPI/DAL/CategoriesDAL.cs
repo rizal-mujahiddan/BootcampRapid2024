@@ -85,8 +85,10 @@ namespace RapidBootcamp.BackendAPI.DAL
                 List<Category> categories = new List<Category>();
 
                 string query = @"sp_GetAllCategories";
+
                 _command = new SqlCommand(query, _connection);
                 _command.CommandType = CommandType.StoredProcedure;
+
                 //buka koneksi
                 _connection.Open();
 

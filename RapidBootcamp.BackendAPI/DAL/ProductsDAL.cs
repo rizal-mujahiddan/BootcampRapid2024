@@ -1,7 +1,6 @@
 ﻿using RapidBootcamp.BackendAPI.Models;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -16,14 +15,12 @@ namespace RapidBootcamp.BackendAPI.DAL
         private SqlConnection _connection;
         private SqlCommand _command;
         private SqlDataReader _reader;
-        private readonly IProduct _product;
 
-        public ProductsDAL(IConfiguration config, IProduct product)
+        public ProductsDAL(IConfiguration config)
         {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection");
             _connection = new SqlConnection(_connectionString);
-            _product = product;
         }
 
         public Product Add(Product entity)
@@ -84,7 +81,7 @@ namespace RapidBootcamp.BackendAPI.DAL
                 List<Product> products = new List<Product>();
                 string query = @"sp_GetAllProducts";
                 _command = new SqlCommand(query, _connection);
-                _command.CommandType = CommandType.StoredProcedure;
+                _command.CommandType = System.Data.CommandType.StoredProcedure;
                 _connection.Open();
                 _reader = _command.ExecuteReader();
                 if (_reader.HasRows)
@@ -326,11 +323,10 @@ namespace RapidBootcamp.BackendAPI.DAL
         {
             try
             {
-                string query = @"SELECT Stock from Products where ProductId=@ProductId";
+                string query = @"select Stock from Products where ProductId=@ProductId";
                 _command = new SqlCommand(query, _connection);
                 _command.Parameters.AddWithValue("@ProductId", productId);
                 _connection.Open();
-
                 int stock = Convert.ToInt32(_command.ExecuteScalar());
                 return stock;
             }

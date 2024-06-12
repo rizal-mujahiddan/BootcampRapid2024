@@ -5,45 +5,50 @@ using System.Transactions;
 
 namespace RapidBootcamp.BackendAPI.DAL
 {
-    public class OrderHeaderDAL : IOrderHeaders
+    public class OrderHeadersDAL : IOrderHeaders
     {
         private string? _connectionString;
         private readonly IConfiguration _config;
         private readonly IOrderDetail _orderDetail;
         private SqlConnection _connection;
+        private readonly IWallet _wallet;
         private SqlCommand _command;
         private SqlDataReader _reader;
 
-        public OrderHeaderDAL(IConfiguration config, IOrderDetail orderDetail)
+        public OrderHeadersDAL(IConfiguration config, IOrderDetail orderDetail, IWallet wallet)
         {
             _config = config;
+            _orderDetail = orderDetail;
             _connectionString = _config.GetConnectionString("DefaultConnection");
             _connection = new SqlConnection(_connectionString);
-            _orderDetail = orderDetail;
+            _wallet = wallet;
         }
 
         public OrderHeader Add(OrderHeader entity)
         {
             TransactionManager.ImplicitDistributedTransactions = true;
-            using (TransactionScope scope = new TransactionScope()) { 
+            using (TransactionScope scope = new TransactionScope())
+            {
                 try
                 {
                     string lastOrderHeaderId = GetOrderLastHeaderId();
 
                     lastOrderHeaderId = lastOrderHeaderId.Substring(4, 4);
                     int newOrderHeaderId = Convert.ToInt32(lastOrderHeaderId) + 1;
-                    string newOrderHeaderIdString = "INV-" + newOrderHeaderId.ToString("D4");
+                    string newOrderHeaderIdString = "INV-" + newOrderHeaderId.ToString().PadLeft(4, '0');
+                    entity.OrderHeaderId = newOrderHeaderIdString;
 
                     string query = @"insert into OrderHeaders (OrderHeaderId, WalletId) 
-                                     values (@OrderHeaderId, @WalletId)";
+                                 values (@OrderHeaderId, @WalletId)";
                     _command = new SqlCommand(query, _connection);
                     _command.Parameters.AddWithValue("@OrderHeaderId", entity.OrderHeaderId);
                     _command.Parameters.AddWithValue("@WalletId", entity.WalletId);
                     _connection.Open();
                     _command.ExecuteNonQuery();
 
-
-                    if (entity.OrderDetails != null) {
+                    // tambah item detail produck yng dijual
+                    if (entity.OrderDetails != null)
+                    {
                         foreach (var item in entity.OrderDetails)
                         {
                             item.OrderHeaderId = newOrderHeaderIdString;
@@ -51,15 +56,38 @@ namespace RapidBootcamp.BackendAPI.DAL
                         }
                     }
 
+                    // cek wallet saldo
+                    decimal saldo = _wallet.GetWalletSaldo(entity.WalletId);
+                    decimal total = _orderDetail.GetTotalAmount(newOrderHeaderIdString);
+
+                    if (saldo < total)
+                    {
+                        throw new ArgumentException("Saldo Tidak Mencukupi");
+                    }
+                    //update saldo wallet
+                    saldo -= total;
+                    _wallet.UpdateWalletSaldo(entity.WalletId, saldo);
+
+
 
                     scope.Complete();
+
                     return entity;
+                }
+                catch (TransactionException transEx)
+                {
+                    throw new ArgumentException(transEx.Message);
                 }
                 catch (SqlException sqlEx)
                 {
                     throw new ArgumentException(sqlEx.Message);
                 }
-                finally {
+                catch (Exception ex)
+                {
+                    throw new ArgumentException(ex.Message);
+                }
+                finally
+                {
                     scope.Dispose();
                     _command.Dispose();
                     _connection.Close();
@@ -164,7 +192,6 @@ namespace RapidBootcamp.BackendAPI.DAL
             }
             finally
             {
-
                 _command.Dispose();
                 _connection.Close();
             }
@@ -172,13 +199,10 @@ namespace RapidBootcamp.BackendAPI.DAL
 
         public string GetOrderLastHeaderId()
         {
-
-
-
+            string query = @"select top 1 OrderHeaderId from OrderHeaders 
+                             order by OrderHeaderId desc";
             try
             {
-                string query = @"select top 1 OrderHeaderId from OrderHeaders 
-                             order by OrderHeaderId desc";
                 _command = new SqlCommand(query, _connection);
                 _connection.Open();
                 var lastOrderHeaderId = _command.ExecuteScalar().ToString();
@@ -194,7 +218,6 @@ namespace RapidBootcamp.BackendAPI.DAL
             }
             finally
             {
-                _command.Dispose();
                 _connection.Close();
             }
         }

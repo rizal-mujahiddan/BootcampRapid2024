@@ -6,5 +6,6 @@ namespace RapidBootcamp.BackendAPI.DAL
     {
         IEnumerable<OrderDetail> GetDetailsByHeaderId(string orderHeaderId);
         decimal GetTotalAmount(string orderHeaderId);
+
     }
 }
