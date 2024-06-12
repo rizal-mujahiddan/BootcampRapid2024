@@ -5,11 +5,12 @@ namespace RapidBootcamp.BackendAPI.DAL
 {
     public class ProductEF : IProduct
     {
-        private readonly AppDbContext _appDbcontext;
+        private readonly AppDbContext _appDbContext;
         public ProductEF(AppDbContext appDbContext)
         {
-            _appDbcontext = appDbContext; 
+            _appDbContext = appDbContext;
         }
+
         public Product Add(Product entity)
         {
             throw new NotImplementedException();
@@ -22,8 +23,7 @@ namespace RapidBootcamp.BackendAPI.DAL
 
         public IEnumerable<Product> GetAll()
         {
-            var results = _appDbcontext.Products.Include(p => p.Category)
-                .OrderBy(p => p.ProductId).ToList();
+            var results = _appDbContext.Products.OrderBy(p => p.ProductName).ToList();
             return results;
         }
 
@@ -44,7 +44,8 @@ namespace RapidBootcamp.BackendAPI.DAL
 
         public IEnumerable<Product> GetProducsWithCategory()
         {
-            var results = _appDbcontext.Products.Include(p=> p.Category).OrderBy(p => p.ProductId).ToList();
+            var results = _appDbContext.Products.Include(p => p.Category)
+                .OrderBy(p => p.ProductName).ToList();
             return results;
         }
 

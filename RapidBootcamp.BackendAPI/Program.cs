@@ -3,12 +3,13 @@ using RapidBootcamp.BackendAPI.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers().AddJsonOptions(options => {
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
+//builder.Services.AddControllers();
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,16 +20,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-
 //DI
-//builder.Services.AddScoped<ICategory, CategoriesDAL>();
-//builder.Services.AddScoped<IProduct, ProductsDAL>();
 builder.Services.AddScoped<ICategory, CategoryEF>();
 builder.Services.AddScoped<IProduct, ProductEF>();
-builder.Services.AddScoped<IOrderHeaders,OrderHeadersDAL>();
+builder.Services.AddScoped<IOrderHeaders, OrderHeadersDAL>();
 builder.Services.AddScoped<IOrderDetail, OrderDetailsDAL>();
 builder.Services.AddScoped<IWallet, WalletsDAL>();
-
 
 var app = builder.Build();
 

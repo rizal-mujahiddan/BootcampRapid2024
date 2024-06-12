@@ -4,11 +4,12 @@ namespace RapidBootcamp.BackendAPI.DAL
 {
     public class CategoryEF : ICategory
     {
-        private readonly AppDbContext _context;
-        public CategoryEF(AppDbContext context)
+        private readonly AppDbContext _appDbContext;
+        public CategoryEF(AppDbContext appDbContext)
         {
-            _context = context;
+            _appDbContext = appDbContext;
         }
+
         public Category Add(Category entity)
         {
             throw new NotImplementedException();
@@ -21,7 +22,7 @@ namespace RapidBootcamp.BackendAPI.DAL
 
         public IEnumerable<Category> GetAll()
         {
-            var results = _context.Categories.OrderBy(c => c.CategoryName).ToList();
+            var results = _appDbContext.Categories.OrderBy(c => c.CategoryName).ToList();
             return results;
         }
 

@@ -23,24 +23,23 @@ namespace RapidBootcamp.BackendAPI.Controllers
         {
             List<ProductDTO> productDTOs = new List<ProductDTO>();
             var products = _product.GetProducsWithCategory();
+
             foreach (var product in products)
             {
                 ProductDTO productDTO = new ProductDTO
                 {
                     ProductId = product.ProductId,
                     ProductName = product.ProductName,
-                    Price = product.Price,
                     Stock = product.Stock,
+                    Price = product.Price,
                     Category = new CategoryDTO
                     {
                         CategoryId = product.Category.CategoryId,
-                        CategoryName = product.Category.CategoryName,
+                        CategoryName = product.Category.CategoryName
                     }
-
                 };
                 productDTOs.Add(productDTO);
             }
-
 
             return productDTOs;
         }
@@ -54,18 +53,18 @@ namespace RapidBootcamp.BackendAPI.Controllers
             return product;
         }
 
-        [HttpGet("ByCategory/{CategoryId}")]
-        public IEnumerable<Product> GetByCategory(int CategoryId)
+        [HttpGet("ByCategory/{categoryId}")]
+        public IEnumerable<Product> GetByCategory(int categoryId)
         {
-            var products = _product.GetByCategory(CategoryId);
+            var products = _product.GetByCategory(categoryId);
             return products;
         }
 
         [HttpGet("ByProductName")]
-        public ActionResult<IEnumerable<Product>> GetByCategory(string name)
+        public IEnumerable<Product> GetByProductName(string name)
         {
             var products = _product.GetByProductName(name);
-            return Ok(products);
+            return products;
         }
 
         // POST api/<ProductsController>
@@ -74,8 +73,8 @@ namespace RapidBootcamp.BackendAPI.Controllers
         {
             try
             {
-                var results = _product.Add(product);
-                return CreatedAtAction(nameof(Get), new { id = results.ProductId }, results);
+                var result = _product.Add(product);
+                return CreatedAtAction(nameof(Get), new { id = result.ProductId }, result);
             }
             catch (Exception ex)
             {
@@ -85,18 +84,17 @@ namespace RapidBootcamp.BackendAPI.Controllers
 
         // PUT api/<ProductsController>/5
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] Product product
-            )
+        public ActionResult Put(int id, [FromBody] Product product)
         {
             var updateProduct = _product.GetById(id);
-            if(updateProduct == null)
+            if (updateProduct == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
             try
             {
                 updateProduct.ProductName = product.ProductName;
-                updateProduct.ProductId = product.CategoryId;
+                updateProduct.CategoryId = product.CategoryId;
                 updateProduct.Stock = product.Stock;
                 updateProduct.Price = product.Price;
                 var result = _product.Update(updateProduct);
@@ -113,13 +111,14 @@ namespace RapidBootcamp.BackendAPI.Controllers
         public ActionResult Delete(int id)
         {
             var deleteProduct = _product.GetById(id);
-            if (deleteProduct == null) { 
+            if (deleteProduct == null)
+            {
                 return NotFound();
             }
             try
             {
                 _product.Delete(id);
-                return Ok($"Product {id} berasil didelete...");
+                return Ok($"Product {id} berhasil didelete..");
             }
             catch (Exception ex)
             {

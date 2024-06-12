@@ -16,6 +16,7 @@ namespace RapidBootcamp.BackendAPI.Controllers
         {
             _category = category;
         }
+
         // GET: api/<CategoriesController>
         [HttpGet]
         public IEnumerable<CategoryDTO> Get()
@@ -23,10 +24,12 @@ namespace RapidBootcamp.BackendAPI.Controllers
             List<CategoryDTO> categoryDTOs = new List<CategoryDTO>();
             var categories = _category.GetAll();
 
-            foreach (var category in categories) { 
-                CategoryDTO categoryDTO = new CategoryDTO { 
+            foreach (var category in categories)
+            {
+                CategoryDTO categoryDTO = new CategoryDTO
+                {
                     CategoryId = category.CategoryId,
-                    CategoryName = category.CategoryName,
+                    CategoryName = category.CategoryName
                 };
                 categoryDTOs.Add(categoryDTO);
             }
@@ -35,34 +38,45 @@ namespace RapidBootcamp.BackendAPI.Controllers
 
         // GET api/<CategoriesController>/5
         [HttpGet("{id}")]
-        public Category Get(int id)
+        public CategoryDTO Get(int id)
         {
             var category = _category.GetById(id);
-            return category;
+            CategoryDTO categoryDTO = new CategoryDTO
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName
+            };
+
+            return categoryDTO;
         }
 
         [HttpGet("ByName")]
-        public IEnumerable<Category> GetByName(string name) {
+        public IEnumerable<Category> GetByName(string name)
+        {
             var categories = _category.GetByCategoryName(name);
             return categories;
         }
 
         // POST api/<CategoriesController>
         [HttpPost]
-        public IActionResult Post(CreateCategoryDTO createCategoryDto)
+        public ActionResult Post(CreateCategoryDTO createCategoryDto)
         {
             try
             {
-                Category category = new Category { 
+                Category category = new Category
+                {
                     CategoryName = createCategoryDto.CategoryName
                 };
                 var result = _category.Add(category);
+
                 CategoryDTO categoryDTO = new CategoryDTO
                 {
-                    CategoryId = category.CategoryId,
-                    CategoryName = category.CategoryName,
+                    CategoryId = result.CategoryId,
+                    CategoryName = result.CategoryName
                 };
-                return CreatedAtAction(nameof(Get), new { id = category.CategoryId }, categoryDTO);
+
+                return CreatedAtAction(nameof(Get),
+                    new { id = category.CategoryId }, categoryDTO);
             }
             catch (Exception ex)
             {
@@ -72,12 +86,13 @@ namespace RapidBootcamp.BackendAPI.Controllers
 
         // PUT api/<CategoriesController>/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Category category)
+        public ActionResult Put(int id, Category category)
         {
+            var updateData = _category.GetById(id);
             try
             {
-                var updateData = _category.GetById(id);
-                if (updateData != null) {
+                if (updateData != null)
+                {
                     updateData.CategoryName = category.CategoryName;
                     var result = _category.Update(updateData);
                     return Ok(result);
@@ -90,9 +105,10 @@ namespace RapidBootcamp.BackendAPI.Controllers
             }
         }
 
+
         // DELETE api/<CategoriesController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public ActionResult Delete(int id)
         {
             try
             {
