@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RapidBootcamp.BackendAPI.DAL;
+using RapidBootcamp.BackendAPI.DTO;
 using RapidBootcamp.BackendAPI.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -17,10 +18,19 @@ namespace RapidBootcamp.BackendAPI.Controllers
         }
         // GET: api/<CategoriesController>
         [HttpGet]
-        public IEnumerable<Category> Get()
+        public IEnumerable<CategoryDTO> Get()
         {
+            List<CategoryDTO> categoryDTOs = new List<CategoryDTO>();
             var categories = _category.GetAll();
-            return categories;
+
+            foreach (var category in categories) { 
+                CategoryDTO categoryDTO = new CategoryDTO { 
+                    CategoryId = category.CategoryId,
+                    CategoryName = category.CategoryName,
+                };
+                categoryDTOs.Add(categoryDTO);
+            }
+            return categoryDTOs;
         }
 
         // GET api/<CategoriesController>/5
@@ -39,12 +49,20 @@ namespace RapidBootcamp.BackendAPI.Controllers
 
         // POST api/<CategoriesController>
         [HttpPost]
-        public IActionResult Post(Category category)
+        public IActionResult Post(CreateCategoryDTO createCategoryDto)
         {
             try
             {
+                Category category = new Category { 
+                    CategoryName = createCategoryDto.CategoryName
+                };
                 var result = _category.Add(category);
-                return CreatedAtAction(nameof(Get),new { id = category.CategoryId}, category);
+                CategoryDTO categoryDTO = new CategoryDTO
+                {
+                    CategoryId = category.CategoryId,
+                    CategoryName = category.CategoryName,
+                };
+                return CreatedAtAction(nameof(Get), new { id = category.CategoryId }, categoryDTO);
             }
             catch (Exception ex)
             {

@@ -14,9 +14,9 @@ namespace RapidBootcamp.BackendAPI.DAL
         private SqlCommand _command;
         private SqlDataReader _reader;
 
-        public WalletsDAL(IConfiguration config, IWallet wallet)
+        public WalletsDAL(IConfiguration config)
         {
-            _wallet = wallet;
+
             _config = config;
         }
         public IWallet Add(IWallet entity)
